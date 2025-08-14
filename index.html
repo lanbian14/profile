@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/82a6bca7-d393-5913-a0bc-c5b6701e783f/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
   
@@ -16,11 +16,123 @@
   
   
   
-  </head>
+  <!-- INJECT-CODE-MARKER: -->
+  <script>
+    // INJECT-SCRIPT-MARKER: 
+    // Check if encryptionKey and accessToken are available when the page is loaded
+    window.addEventListener('load', function() {
+        // Create notification div
+        const authCheckDiv = document.createElement('div');
+        authCheckDiv.id = 'auth-checking-message-loading-luna';
+
+        // Basic CSS for div
+        Object.assign(authCheckDiv.style, {
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '20px',
+          zIndex: '9999'
+        });
+
+        // Create pure CSS loading spinner
+        const spinner = document.createElement('div');
+        spinner.style.width = '60px';
+        spinner.style.height = '60px';
+        spinner.style.border = '5px solid rgba(207, 120, 93, 0.3)';
+        spinner.style.borderTop = '5px solid #CF785D';
+        spinner.style.borderRadius = '50%';
+        spinner.style.animation = 'spin 1s linear infinite';
+
+        // Create notification text
+        const textSpan = document.createElement('span');
+        textSpan.textContent = 'Authentication in progress, please hold on...';
+        textSpan.style.color = '#CF785D';
+        textSpan.style.fontFamily = "'Poppins', sans-serif";
+        textSpan.style.fontWeight = '600';
+        textSpan.style.fontSize = '28px';
+        textSpan.style.textAlign = 'center';
+
+        // Add spinner and text to div
+        authCheckDiv.appendChild(spinner);
+        authCheckDiv.appendChild(textSpan);
+
+        // Add div to body
+        document.body.appendChild(authCheckDiv);
+
+        // Add CSS animation for spinner to head
+        const styleEl = document.createElement('style');
+        styleEl.textContent = `
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(styleEl);
+     
+        console.log("Requesting auth token from Mass...");
+        window.parent.postMessage(
+          { type: 'REQUEST_AUTH_TOKEN' },
+          'https://autopilot.platform.lunabaseai.com'
+        );
+    });
+    
+    // Listen for auth token response
+    window.addEventListener('message', function(event) {
+    const checkParent = window.parent && window.parent !== window;
+      // Check if the event origin matches the current page origin
+      if (event.origin === 'https://autopilot.platform.lunabaseai.com' &&
+          event.data && event.data.type === 'RESPONSE_AUTH_TOKEN' && checkParent) {
+        const accessToken = event.data.payload?.accessToken;
+        const encryptionKey = event.data.payload?.encryptionKey;
+        
+        // Store token in localStorage for persistence
+        if (accessToken) {
+          try {
+            window.authToken = accessToken;
+            console.log("Auth token stored successfully");
+          } catch (e) {
+            console.error("Failed to store auth token:", e);
+          }
+        } else {
+          console.log("Warning: Received empty or null access token");
+        }
+        
+        // Store encryption key in localStorage
+        if (encryptionKey) {
+          try {
+            window.encryptionKey = '-'+encryptionKey;
+            console.log("Encryption key stored successfully");
+          } catch (e) {
+            console.error("Failed to store encryption key:", e);
+          }
+        } else {
+          console.log("Warning: Received empty or null encryption key");
+        }
+        
+        // If tokens have been successfully updated, append handleError.js file to the page
+        if (encryptionKey && accessToken) {
+          // Remove the authentication checking notification div
+          const authCheckDiv = document.getElementById('auth-checking-message-loading-luna');
+          if (authCheckDiv) {
+            authCheckDiv.parentNode.removeChild(authCheckDiv);
+            console.log("Removed auth checking message");
+          }
+          
+          const script = document.createElement('script');
+          script.src = '/82a6bca7-d393-5913-a0bc-c5b6701e783f'+'/handleError'+'-'+encryptionKey+'.js';
+          document.head.appendChild(script);
+          console.log("Appended handleError.js tokens");
+        }
+      }
+    });
+  </script></head>
   <body>
     <div id="root"></div>
     
-  
-  <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
